@@ -1,5 +1,5 @@
 /// <reference types='cypress' />
-import { format } from '../support/utils'
+import { format, prepareLocalStorage } from '../support/utils'
 context('Dev Finances Agilizei', () => {
 
     //HOOKS
@@ -9,8 +9,11 @@ context('Dev Finances Agilizei', () => {
     // before()
 
     beforeEach(() =>{
-        cy.visit('https://devfinance-agilizei.netlify.app/');
-        cy.get('#data-table tbody tr').should('have.length', 0);
+        cy.visit('https://devfinance-agilizei.netlify.app/', {
+            onBeforeLoad: (win) => {
+                prepareLocalStorage(win);
+            }
+        });
     })
 
     it('Cadastrar entradas', () => {
@@ -20,7 +23,7 @@ context('Dev Finances Agilizei', () => {
         cy.get('[type=date]').type('2022-03-17');
         cy.get('button').contains('Salvar').click();
 
-        cy.get('#data-table tbody tr').should('have.length', 1);
+        cy.get('#data-table tbody tr').should('have.length', 3);
     });
 
     it('Cadastrar saídas', () => {
@@ -30,33 +33,18 @@ context('Dev Finances Agilizei', () => {
         cy.get('[type=date]').type('2022-03-17');
         cy.get('button').contains('Salvar').click();
 
-        cy.get('#data-table tbody tr').should('have.length', 1);
+        cy.get('#data-table tbody tr').should('have.length', 3);
     });
 
     it('Remover entradas e saídas', () => {
-        const entrada = 'Mesada';
-        const saida = 'KinderOvo';
-
-        cy.get('#transaction .button').click();
-        cy.get('#description').type(entrada);
-        cy.get('[name=amount]').type(20);
-        cy.get('[type=date]').type('2022-03-17');
-        cy.get('button').contains('Salvar').click();
-
-        cy.get('#transaction .button').click();
-        cy.get('#description').type(saida);
-        cy.get('[name=amount]').type(-12);
-        cy.get('[type=date]').type('2022-03-17');
-        cy.get('button').contains('Salvar').click();
-
         cy.get('td.description')
-        .contains(entrada)
+        .contains("Mesada")
         .parent()
         .find('img[onclick*=remove]')
         .click();
 
         cy.get('td.description')
-        .contains(saida)
+        .contains("Suco Kapo")
         .parent()
         .find('img[onclick*=remove]')
         .click();
@@ -65,21 +53,6 @@ context('Dev Finances Agilizei', () => {
     });
 
     it('Validar saldo com diversas transações', () => {
-        const entrada = 'Mesada';
-        const saida = 'KinderOvo';
-
-        cy.get('#transaction .button').click();
-        cy.get('#description').type(entrada);
-        cy.get('[name=amount]').type(20);
-        cy.get('[type=date]').type('2022-03-17');
-        cy.get('button').contains('Salvar').click();
-
-        cy.get('#transaction .button').click();
-        cy.get('#description').type(saida);
-        cy.get('[name=amount]').type(-12);
-        cy.get('[type=date]').type('2022-03-17');
-        cy.get('button').contains('Salvar').click();
-
         let incomes = 0;
         let expenses = 0;
 
